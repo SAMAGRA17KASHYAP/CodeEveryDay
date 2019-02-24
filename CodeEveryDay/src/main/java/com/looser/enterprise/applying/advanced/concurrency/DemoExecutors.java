@@ -18,6 +18,7 @@ public class DemoExecutors {
 		for (int i = 0; i < 10; i++) {
 			service.execute(runnable);
 		}
+		service.shutdown();
 	}
 
 	private static void runningNewThreadEveryTime() {
