@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,7 +32,8 @@ public class ProducerConsumerWithLocks {
 				try {
 					lock.lock();
 					if (isEmpty())
-						isEmpty.await();
+						if(isEmpty.await(10,TimeUnit.MILLISECONDS))
+							throw new TimeoutException("Waited for very long time for production");;
 					buffer[--count] = 0;
 					isFull.signalAll();
 				} finally {
@@ -49,8 +52,10 @@ public class ProducerConsumerWithLocks {
 		public String call() throws Exception {
 			int i = 0;
 			while (i < 50) {
+				
 				try {
 					lock.lock();
+					int x = 10/0;
 					if (isFull()) {
 						isFull.await();
 					}
@@ -92,8 +97,8 @@ public class ProducerConsumerWithLocks {
 			futureResult.forEach(x->{
 				try {
 					System.out.println(x.get());
-				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					System.out.println("ProducerConsumerWithLocks.main()::"+e.getMessage());
 				}
 			});
 		} finally {
