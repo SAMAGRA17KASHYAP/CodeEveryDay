@@ -12,9 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.looser.enterprise.applying.advanced.concurrency.fp.date1March2019.ProducerAndConsumer.Consumer;
-import com.looser.enterprise.applying.advanced.concurrency.fp.date1March2019.ProducerAndConsumer.Producer;
-
 public class ProducerAndConsumer {
 
 	private static final int BUFFER_COUNT = 50;
