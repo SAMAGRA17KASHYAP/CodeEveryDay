@@ -14,18 +14,18 @@ import com.looser.enterprise.applying.advanced.concurrency.async.completable.cha
 
 public class FirstDemo {
 
-	public static void sleep(int n)
-	{
+	public static void sleep(int n) {
 		try {
 			Thread.sleep(n);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void main(String[] argv)
 	{
 		ExecutorService service =Executors.newFixedThreadPool(1);
+		ExecutorService service2 =Executors.newFixedThreadPool(1);
 		Supplier<List<Long>>  supplyIDs = ()->{
 			System.out.println("supplyID:Running in :"+Thread.currentThread().getName());
 			sleep(500);
@@ -35,7 +35,13 @@ public class FirstDemo {
 		Function<List<Long>,CompletableFuture<List<User>>> fetchUsers = ids->{
 			sleep(800);
 			System.out.println("fetchUsers:Running in :"+Thread.currentThread().getName());
-			Supplier<List<User>> listOfUserSupplier =()->ids.stream().map(x->new User(x)).collect(Collectors.toList());
+			Supplier<List<User>> listOfUserSupplier =
+			()->{
+				System.out.println("listOfUserSupplier:Running in :"+Thread.currentThread().getName());
+				
+				return ids.stream().map(x->new User(x)).collect(Collectors.toList());
+				};
+//			return CompletableFuture.supplyAsync(listOfUserSupplier,service2);
 			return CompletableFuture.supplyAsync(listOfUserSupplier);
 		};
 		
@@ -44,11 +50,12 @@ public class FirstDemo {
 			System.out.println(x);});
 		
 		CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(supplyIDs)
-							.thenCompose(fetchUsers)
+							.thenComposeAsync(fetchUsers,service2)
 							.thenAcceptAsync(displayer,service);
 		
 		sleep(2_000);
 		service.shutdown();
+		service2.shutdown();
 	}
-	
+
 }
