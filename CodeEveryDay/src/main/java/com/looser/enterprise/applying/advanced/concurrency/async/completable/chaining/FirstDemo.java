@@ -31,9 +31,10 @@ public class FirstDemo {
 			return Arrays.asList(1L,2L,3L);
 		};
 		
-		Function<List<Long>,List<User>> fetchUsers = ids->{
+		Function<List<Long>,CompletableFuture<List<User>>> fetchUsers = ids->{
 			sleep(800);
-			return ids.stream().map(x->new User(x)).collect(Collectors.toList());
+			Supplier<List<User>> listOfUserSupplier =()->ids.stream().map(x->new User(x)).collect(Collectors.toList());
+			return CompletableFuture.supplyAsync(listOfUserSupplier);
 		};
 		
 		Consumer<List<User>> displayer = users -> users.forEach(x->{
@@ -41,7 +42,7 @@ public class FirstDemo {
 			System.out.println(x);});
 		
 		CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(supplyIDs)
-							.thenApply(fetchUsers)
+							.thenCompose(fetchUsers)
 							.thenAcceptAsync(displayer,service);
 		
 		sleep(2_000);
