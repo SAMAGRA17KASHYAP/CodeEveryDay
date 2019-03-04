@@ -27,12 +27,14 @@ public class FirstDemo {
 	{
 		ExecutorService service =Executors.newFixedThreadPool(1);
 		Supplier<List<Long>>  supplyIDs = ()->{
+			System.out.println("supplyID:Running in :"+Thread.currentThread().getName());
 			sleep(500);
 			return Arrays.asList(1L,2L,3L);
 		};
 		
 		Function<List<Long>,CompletableFuture<List<User>>> fetchUsers = ids->{
 			sleep(800);
+			System.out.println("fetchUsers:Running in :"+Thread.currentThread().getName());
 			Supplier<List<User>> listOfUserSupplier =()->ids.stream().map(x->new User(x)).collect(Collectors.toList());
 			return CompletableFuture.supplyAsync(listOfUserSupplier);
 		};
