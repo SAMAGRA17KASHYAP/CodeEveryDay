@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.looser.enterprise.applying.advanced.concurrency.async.completable.chaining.model.Email;
 import com.looser.enterprise.applying.advanced.concurrency.async.completable.chaining.model.User;
 
 public class FirstDemo {
@@ -22,37 +23,52 @@ public class FirstDemo {
 		}
 	}
 
-	public static void main(String[] argv)
-	{
-		ExecutorService service =Executors.newFixedThreadPool(1);
-		ExecutorService service2 =Executors.newFixedThreadPool(1);
-		Supplier<List<Long>>  supplyIDs = ()->{
-			System.out.println("supplyID:Running in :"+Thread.currentThread().getName());
+	public static void main(String[] argv) {
+		ExecutorService service = Executors.newFixedThreadPool(1);
+		ExecutorService service2 = Executors.newFixedThreadPool(1);
+		Supplier<List<Long>> supplyIDs = () -> {
+			System.out.println(
+					"supplyID:Running in :" + Thread.currentThread().getName());
 			sleep(500);
-			return Arrays.asList(1L,2L,3L);
+			return Arrays.asList(1L, 2L, 3L);
 		};
-		
-		Function<List<Long>,CompletableFuture<List<User>>> fetchUsers = ids->{
-			sleep(800);
-			System.out.println("fetchUsers:Running in :"+Thread.currentThread().getName());
-			Supplier<List<User>> listOfUserSupplier =
-			()->{
-				System.out.println("listOfUserSupplier:Running in :"+Thread.currentThread().getName());
-				
-				return ids.stream().map(x->new User(x)).collect(Collectors.toList());
-				};
-//			return CompletableFuture.supplyAsync(listOfUserSupplier,service2);
+
+		Function<List<Long>, CompletableFuture<List<User>>> fetchUsers = ids -> {
+			sleep(400);
+			System.out.println("fetchUsers:Running in :"
+					+ Thread.currentThread().getName());
+			Supplier<List<User>> listOfUserSupplier = () -> {
+				System.out.println("listOfUserSupplier:Running in :"
+						+ Thread.currentThread().getName());
+
+				return ids.stream().map(x -> new User(x))
+						.collect(Collectors.toList());
+			};
+			// return
+			// CompletableFuture.supplyAsync(listOfUserSupplier,service2);
 			return CompletableFuture.supplyAsync(listOfUserSupplier);
 		};
+
+		Function<List<Long>, CompletableFuture<List<Email>>> fetchEmail = ids -> {
+			sleep(500);
+			Supplier<List<Email>> listOfEmail = () -> {
+				return ids.stream().map(x -> new Email(x))
+						.collect(Collectors.toList());
+			};
+			return CompletableFuture.supplyAsync(listOfEmail);
+		};
+
+		Consumer<List<User>> displayer = users -> users.forEach(x -> {
+			System.out.println(
+					"Running in ::" + Thread.currentThread().getName());
+			System.out.println(x);
+		});
+		CompletableFuture<List<Long>> getIDs = CompletableFuture
+				.supplyAsync(supplyIDs);
+		CompletableFuture<List<User>> usersCF = getIDs.thenCompose(fetchUsers);
+		CompletableFuture<List<Email>> emailCF = getIDs.thenCompose(fetchEmail);
 		
-		Consumer<List<User>> displayer = users -> users.forEach(x->{
-			System.out.println("Running in ::"+Thread.currentThread().getName());
-			System.out.println(x);});
-		
-		CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(supplyIDs)
-							.thenComposeAsync(fetchUsers,service2)
-							.thenAcceptAsync(displayer,service);
-		
+		usersCF.thenAcceptBothAsync(emailCF, (user,email)->System.out.println(user + " - "+email));
 		sleep(2_000);
 		service.shutdown();
 		service2.shutdown();
