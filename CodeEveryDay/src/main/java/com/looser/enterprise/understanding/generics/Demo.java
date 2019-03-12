@@ -72,7 +72,14 @@ public class Demo {
 	 * */
 
 	public static void main(String[] args) {
-
+		try {
+			demoArrayStoreException();
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 
@@ -95,6 +102,31 @@ public class Demo {
 	}
 	
 	//Compiles because arrays are covarient in java
+	/**
+	 * Arrays are reified type in Java. It means that there type 
+	 * information stays at runtime that is why this exception
+	 * came. In contrast to say a List<String> is non refieble type
+	 * 
+	 * ***********************************
+	 * Interoperate between array and generic type
+	 * ************************************
+	 * <pre>
+	 * {@code
+	 * 		class Chall<T>
+	 * 		{
+	 * 			T[] array;
+	 * 			Chall()
+	 * 			{
+	 * 				array = new T[10];//Won't work ; at runtime we don't know what T is
+	 * 				array = (T[]) new Object[10];
+	 * 			}
+	 * 		}
+	 * }
+	 * </pre>
+	 * http://blog.amitinside.com/Array-Reification-I/
+	 * http://blog.amitinside.com/Array-Reification-II/
+	 * */
+	
 	public static void demoArrayStoreException() {
 		Partner[]partners = new Partner[2];
 		partners[0]= new Partner("name1", 55, "logo1");
