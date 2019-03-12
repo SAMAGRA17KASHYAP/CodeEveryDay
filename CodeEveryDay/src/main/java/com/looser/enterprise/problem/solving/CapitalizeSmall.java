@@ -18,7 +18,6 @@ public class CapitalizeSmall {
 		}
 		return builder.toString();
 	}
-
 	public static String cppToJava(String input) {
 		if (Objects.isNull(input))
 			return input;
