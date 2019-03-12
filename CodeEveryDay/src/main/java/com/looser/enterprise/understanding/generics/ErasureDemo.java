@@ -47,6 +47,37 @@ import java.util.List;
 		  public void print(java.util.List<T>);
 		    descriptor: (Ljava/util/List;)V
 		}
+**************************
+*Implication of Erasure
+**************************
+*
+*1. instanceOf doesn't work
+*
+*Because compiler uses type erasure, the runtime does not keep track of type parameters, so at runtime difference between Box<Integer> and Box<String> cannot be verified using instanceOf operator.
+
+Box<Integer> integerBox = new Box<Integer>();
+
+//Compiler Error:
+//Cannot perform instanceof check against 
+//parameterized type Box<Integer>. 
+//Use the form Box<?> instead since further 
+//generic type information will be erased at runtime
+if(integerBox instanceof Box<Integer>) { }
+***************************************
+*2. You can't create exception of generic type
+**************************************
+*	https://www.mscharhag.com/java/java-exceptions-and-generic-types
+*
+********************************************************
+*3. Performance Impact
+********************************************************
+*int[] vs Integer[](internally used by ArrayList)
+*Integer is an derived class of java.lang.Object. It takes very larger space in comparison
+*to int.
+*Integer brings a levl of indirection. ArrayList no longer hold data, it merely holds pinter
+*which points to somewhere in heap. This makes caching tough for CPU in order to have
+*good performance
+*
 
  */
 public class ErasureDemo<T> {
